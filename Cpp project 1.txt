@@ -1,0 +1,298 @@
+#include<fstream>
+#include<iostream>
+#include<string.h>
+#include<conio.h>
+using namespace std;
+class menu
+{
+public:
+    int itemcode;
+    char name[50];
+    int price;
+public:
+    void accept()
+    {
+        cout<<endl<<"Enter Item Code";
+        cin>>itemcode;
+        cout<<"Enter Item name";
+        cin>>name;
+        cout<<"Enter price";
+        cin>>price;
+    }
+    void display()
+    {
+        cout<<endl<<itemcode<<"\t\t"<<name<<"\t"<<price;
+
+    }
+
+};
+menu obj;
+void additem()
+{
+    obj.accept();
+    fstream wr;
+    wr.open("p:\\myproject\\menu.txt",ios::app);
+    wr.write((char *)&obj,sizeof(obj));
+    cout<<endl<<"Item Added Sucessfully";
+
+}
+void viewmenu()
+{
+    fstream rd;
+    rd.open("p:\\myproject\\menu.txt",ios::in);
+
+    rd.seekg(0,ios::end);
+
+    int n=rd.tellg()/sizeof(obj);
+    rd.seekg(0,ios::beg);
+    for(int i=1;i<=n;i++)
+    {
+    rd.read((char *)&obj,sizeof(obj));
+    obj.display();
+    }
+
+}
+void removeitem()
+ {
+    fstream rd,wr;
+    rd.open("p:\\myproject\\menu.txt",ios::in);
+    wr.open("p:\\myproject\\temp.txt",ios::out);
+
+    rd.seekg(0,ios::end);
+
+    int n=rd.tellg()/sizeof(obj);
+
+    rd.seekg(0,ios::beg);
+
+    int sr;
+    cout<<endl<<"Enter item code to remove item";
+    cin>>sr;
+
+    for(int i=1;i<=n;i++)
+    {
+        rd.read((char *)&obj,sizeof(obj));
+
+        if(obj.itemcode==sr)
+        {
+            cout<<endl<<"Item removed";
+        }
+        else
+        {
+            wr.write((char *)&obj,sizeof(obj));
+        }
+    }
+    rd.close();
+    wr.close();
+    remove("p:\\myproject\\menu.txt");
+    rename("p:\\myproject\\temp.txt","p:\\myproject\\menu.txt");
+
+
+}
+
+class bill
+{
+public:
+    int billid;
+    int dd,mm,yy;
+    int icode,pr,qty,total;
+    char iname[50];
+public:
+    void accept(int bid,int d,int m,int y,int ic,int q)
+    {
+        billid=bid;
+        dd=d;
+        mm=m;
+        yy=y;
+        icode=ic;
+        qty=q;
+
+        fstream rd;
+        rd.open("p:\\myproject\\menu.txt",ios::in);
+
+        rd.seekg(0,ios::end);
+        int n=rd.tellg()/sizeof(obj);
+        rd.seekg(0,ios::beg);
+
+        for(int i=1;i<=n;i++)
+        {
+            rd.read((char *)&obj,sizeof(obj));
+            if(icode==obj.itemcode)
+            {
+                strcpy(iname,obj.name);
+                pr=obj.price;
+                total=pr*qty;
+            }
+        }
+
+        cout<<endl<<"Bill id"<<billid;
+        cout<<endl<<"DD-MM-yy"<<dd<<"-"<<mm<<"-"<<yy;
+        cout<<endl<<"item code"<<icode;
+        cout<<endl<<"item name"<<iname;
+        cout<<endl<<"qty"<<qty;
+        cout<<endl<<"total"<<total;
+
+    }
+
+};
+bill bobj;
+
+void preparebill()
+{
+    int bill_number;
+    cout<<endl<<"Enter Bill Number";
+    cin>>bill_number;
+    cout<<"Enter Date in dd mm yyyy format";
+    int day,mon,year;
+    cin>>day>>mon>>year;
+
+    int choice=0;
+    while(1)
+    {
+        int itemcode;
+        cout<<"Enter item code";
+        cin>>itemcode;
+        int qty;
+        cout<<"Enter qty";
+        cin>>qty;
+        bobj.accept(bill_number,day,mon,year,itemcode,qty);
+         fstream wr;
+        wr.open("p:\\myproject\\bill.txt",ios::app);
+        wr.write((char *)&bobj,sizeof(bobj));
+        wr.close();
+        cout<<endl<<endl<<"Enter 1 to add new item";
+        cout<<endl<<"Enter 2 to prepare bill";
+        cin>>choice;
+        if(choice==2)
+        {
+            break;
+        }
+
+    }
+
+    cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+
+
+    cout<<endl<<"Bill Number "<<bill_number<<"\t\t"<<"Dated: "<<day<<"-"<<mon<<"-"<<year;
+
+    cout<<endl<<endl<<endl;
+
+    cout<<endl<<"**************************************************************";
+    cout<<endl<<"\t\t\tCENTRAL PERK";
+    cout<<endl<<"**************************************************************";
+
+    fstream rd;
+    rd.open("p:\\myproject\\bill.txt",ios::in);
+    rd.seekg(0,ios::end);
+    int n=rd.tellg()/sizeof(bobj);
+    rd.seekg(0,ios::beg);
+    int ftotal=0;
+    for(int i=1;i<=n;i++)
+    {
+        rd.read((char *)&bobj,sizeof(bobj));
+        if(bobj.billid==bill_number)
+        {
+            cout<<endl<<bobj.icode<<"\t"<<bobj.iname<<"\t"<<bobj.qty<<"\t"<<bobj.pr<<"\t"<<bobj.total;
+            ftotal=ftotal+bobj.total;
+        }
+
+    }
+    cout<<endl<<endl<<endl;
+    cout<<"*************************************************************";
+    cout<<endl<<"Total Amount is "<<ftotal;
+    cout<<endl<<"*************************************************************";
+}
+    void updateitem()
+{
+    fstream rd,wr;
+    rd.open("p:\\myproject\\menu.txt",ios::in);
+    wr.open("p:\\myproject\\temp.txt",ios::out);
+
+    rd.seekg(0,ios::end);
+
+    int n=rd.tellg()/sizeof(obj);
+
+    rd.seekg(0,ios::beg);
+
+    int sr;
+    cout<<endl<<"Enter item code to update item";
+    cin>>sr;
+
+    for(int i=1;i<=n;i++)
+    {
+        rd.read((char *)&obj,sizeof(obj));
+
+        if(obj.itemcode==sr)
+        {
+            obj.accept();
+            wr.write((char *)&obj,sizeof(obj));
+        }
+        else
+        {
+            wr.write((char *)&obj,sizeof(obj));
+        }
+    }
+    rd.close();
+    wr.close();
+    remove("p:\\myproject\\menu.txt");
+    rename("p:\\myproject\\temp.txt","p:\\myproject\\menu.txt");
+
+}
+int editmenu()
+{
+    viewmenu();
+
+    char n ;
+    cout<<endl<<"to add item press 1\n";
+    cout<<"to remove item press 2\n";
+    cout<<"to update item press 3\n";
+    cout<<"give input (1,2,3):";
+    cin>>n;
+    switch(n)
+    {
+    case '1':
+
+        additem();
+        break;
+    case '2':
+        removeitem();
+        break;
+    case '3':
+        updateitem();
+        break;
+    default:
+        cout<<"please enter the 1,2or3!!";
+        break;
+    }
+    return 0;
+}
+
+main()
+{
+
+
+    char n;
+   do
+   {
+
+
+    cout<<endl<<"press 1 to edit the menu\n";
+    cout<<"press 2 to prepare bill\n";
+    cout<<"enter choice (1,2):";
+    cin>>n;
+        switch(n)
+        {
+        case '1':
+              editmenu();
+              break;
+        case '2':
+              viewmenu();
+              preparebill();
+              break;
+        default:
+            cout<<"please enter 1 and 2 only!!";
+            break;
+        }
+ }
+ while(n!=2);
+ return 0;
+}
